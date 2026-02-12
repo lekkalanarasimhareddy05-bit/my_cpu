@@ -1,0 +1,73 @@
+`timescale 1ns / 1ps
+
+module tb_control_unit;
+
+    
+    reg        clk;
+    reg        rst;
+    reg [7:0]  instr;
+
+    wire       pc_we;
+    wire       pc_load;
+    wire       rf_we;
+    wire [2:0] rf_waddr;
+    wire [2:0] rf_raddr1;
+    wire [2:0] rf_raddr2;
+    wire [3:0] alu_op;
+
+    
+    control_unit dut (
+        .clk(clk),
+        .rst(rst),
+        .instr(instr),
+        .pc_we(pc_we),
+        .pc_load(pc_load),
+        .rf_we(rf_we),
+        .rf_waddr(rf_waddr),
+        .rf_raddr1(rf_raddr1),
+        .rf_raddr2(rf_raddr2),
+        .alu_op(alu_op)
+    );
+
+    
+    initial begin
+        clk = 0;
+        forever #5 clk = ~clk;   // 10 ns clock
+    end
+
+    
+    initial begin
+        // Reset phase
+        rst   = 1;
+        instr = 8'h00;
+        #10;
+        rst   = 0;
+
+       
+        #10 instr = {4'd0,  4'd1};   // PASS B → R1
+        #10 instr = {4'd1,  4'd2};   // ADD    → R2
+        #10 instr = {4'd2,  4'd3};   // SUB    → R3
+        #10 instr = {4'd3,  4'd4};   // AND    → R4
+        #10 instr = {4'd4,  4'd5};   // OR     → R5
+        #10 instr = {4'd5,  4'd6};   // XOR    → R6
+        #10 instr = {4'd6,  4'd7};   // NAND   → R7
+        #10 instr = {4'd7,  4'd0};   // NOR    → R0
+        #10 instr = {4'd8,  4'd1};   // INC    → R1
+        #10 instr = {4'd9,  4'd2};   // DEC    → R2
+        #10 instr = {4'd10, 4'd3};   // SHL    → R3
+        #10 instr = {4'd11, 4'd4};   // SHR    → R4
+
+        
+        #10 instr = {4'd15, 4'd0};   // rf_we should be 0
+
+        #20 $finish;
+    end
+
+    
+    initial begin
+        $display("Time\tInstr\tPC_WE\tRF_WE\tALU_OP\tWADDR");
+        $monitor("%0t\t%h\t%b\t%b\t%0d\t%0d",
+                 $time, instr, pc_we, rf_we, alu_op, rf_waddr);
+    end
+
+endmodule

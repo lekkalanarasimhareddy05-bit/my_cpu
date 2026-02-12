@@ -1,0 +1,42 @@
+`timescale 1ns / 1ps
+
+module tb_instruction_memory;
+
+    
+    reg  [3:0] pc;        
+    wire [7:0] instr;     
+
+    
+    instruction_memory dut (
+        .pc(pc),
+        .instr(instr)
+    );
+
+    
+    initial begin
+        
+        $monitor("Time=%0t | PC=%h | Instruction=%h", $time, pc, instr);
+
+       
+        pc = 4'd0;   #10;
+        pc = 4'd1;   #10;
+        pc = 4'd2;   #10;
+        pc = 4'd3;   #10;
+        pc = 4'd4;   #10;
+        pc = 4'd5;   #10;
+        pc = 4'd6;   #10;
+        pc = 4'd7;   #10;
+        pc = 4'd8;   #10;
+        pc = 4'd9;   #10;
+        pc = 4'd10;  #10;
+        pc = 4'd11;  #10;
+        pc = 4'd12;  #10;
+        pc = 4'd13;  #10;
+        pc = 4'd14;  #10;
+        pc = 4'd15;  #10;
+
+        
+        $finish;
+    end
+
+endmodule

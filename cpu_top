@@ -1,0 +1,96 @@
+`timescale 1ns / 1ps
+
+module cpu_top (
+    input  clk,
+    input  rst,
+    output [3:0] debug_pc,
+    output [3:0] debug_alu
+);
+
+    // ================= INTERNAL WIRES =================
+
+    // Program Counter
+    wire [3:0] pc_out;
+    wire       pc_we;
+    wire       pc_load;
+    wire [3:0] pc_in;
+
+    // Instruction
+    wire [7:0] instr;
+
+    // Control Unit Signals
+    wire        rf_we;
+    wire [2:0]  rf_waddr;
+    wire [2:0]  rf_raddr1;
+    wire [2:0]  rf_raddr2;
+    wire [3:0]  alu_op;
+
+    // Register File Data
+    wire [3:0] rdata1;
+    wire [3:0] rdata2;
+
+    // ALU Result
+    wire [3:0] alu_result;
+
+    // ================= PROGRAM COUNTER =================
+    pc PC (
+        .clk(clk),
+        .rst(rst),
+        .pc_we(pc_we),
+        .pc_load(pc_load),
+        .pc_in(4'b0000),      // No jump support yet
+        .pc_out(pc_out)
+    );
+
+    // ================= INSTRUCTION MEMORY =================
+    imem IMEM (
+        .pc(pc_out),
+        .instr(instr)
+    );
+
+    // ================= CONTROL UNIT =================
+    cu CU (
+        .clk(clk),
+        .rst(rst),
+        .instr(instr),
+
+        .pc_we(pc_we),
+        .pc_load(pc_load),
+
+        .rf_we(rf_we),
+        .rf_waddr(rf_waddr),
+        .rf_raddr1(rf_raddr1),
+        .rf_raddr2(rf_raddr2),
+
+        .alu_op(alu_op)
+    );
+
+    // ================= REGISTER FILE =================
+    reg_file RF (
+        .clk(clk),
+        .rst(rst),
+
+        .we(rf_we),
+        .waddr(rf_waddr),
+        .wdata(alu_result),
+
+        .raddr1(rf_raddr1),
+        .raddr2(rf_raddr2),
+
+        .rdata1(rdata1),
+        .rdata2(rdata2)
+    );
+
+    // ================= ALU =================
+    alu ALU (
+        .a(rdata1),
+        .b(rdata2),
+        .alu_op(alu_op),
+        .result(alu_result)
+    );
+
+    // ================= DEBUG OUTPUTS =================
+    assign debug_pc  = pc_out;
+    assign debug_alu = alu_result;
+
+endmodule

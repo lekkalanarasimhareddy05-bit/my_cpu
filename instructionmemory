@@ -1,0 +1,37 @@
+`timescale 1ns / 1ps
+
+
+module instruction_memory (
+    input      [3:0] pc,        
+    output reg [7:0] instr       
+);
+
+   
+    reg [7:0] mem [0:15];
+
+    
+    initial begin
+        mem[0]  = 8'h10; // ADD   R0
+        mem[1]  = 8'h21; // SUB   R1
+        mem[2]  = 8'h32; // AND   R2
+        mem[3]  = 8'h43; // OR    R3
+        mem[4]  = 8'h54; // XOR   R4
+        mem[5]  = 8'h65; // NAND  R5
+        mem[6]  = 8'h76; // NOR   R6
+        mem[7]  = 8'h87; // INC   R7
+        mem[8]  = 8'h98; // DEC   R0
+        mem[9]  = 8'hA9; // SHL   R1
+        mem[10] = 8'hBA; // SHR   R2
+        mem[11] = 8'hCB; // PASSB R3
+        mem[12] = 8'hDC; // Reserved
+        mem[13] = 8'hED; // Reserved
+        mem[14] = 8'hFE; // Reserved
+        mem[15] = 8'h00; // NOP
+    end
+
+    
+    always @(*) begin
+        instr = mem[pc];
+    end
+
+endmodule

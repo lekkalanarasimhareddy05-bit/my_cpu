@@ -1,0 +1,70 @@
+`timescale 1ns / 1ps
+
+module control_unit (
+    input        clk,
+    input        rst,
+    input  [7:0] instr,
+
+    
+    output reg        pc_we,
+    output reg        pc_load,
+
+    
+    output reg        rf_we,
+    output reg [2:0]  rf_waddr,
+    output reg [2:0]  rf_raddr1,
+    output reg [2:0]  rf_raddr2,
+
+    
+    output reg [3:0]  alu_op
+);
+
+   
+    wire [3:0] opcode  = instr[7:4];
+    wire [3:0] operand = instr[3:0];
+
+   
+    always @(*) begin
+       
+        pc_we     = 1'b1;      
+        pc_load   = 1'b0;
+
+        rf_we     = 1'b0;
+        rf_waddr  = 3'b000;
+        rf_raddr1 = 3'b000;   
+        rf_raddr2 = 3'b001;   
+
+        alu_op    = 4'd0;
+
+        
+        case (opcode)
+
+           
+            4'd0,   // PASS B
+            4'd1,   // ADD
+            4'd2,   // SUB
+            4'd3,   // AND
+            4'd4,   // OR
+            4'd5,   // XOR
+            4'd6,   // NAND
+            4'd7,   // NOR
+            4'd8,   // INC
+            4'd9,   // DEC
+            4'd10,  // SHL
+            4'd11:  // SHR
+            begin
+                alu_op    = opcode;
+                rf_we     = 1'b1;           
+                rf_waddr  = operand[2:0];   
+            end
+
+           
+            default: begin
+                rf_we = 1'b0;
+            end
+
+        endcase
+    end
+
+endmodule
+

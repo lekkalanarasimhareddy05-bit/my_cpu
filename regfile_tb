@@ -1,0 +1,92 @@
+`timescale 1ns / 1ps
+
+module tb_reg_file;
+
+    // -------------------------
+    // Testbench signals
+    // -------------------------
+    reg        clk;
+    reg        rst;
+    reg        we;
+    reg  [2:0] waddr;
+    reg  [3:0] wdata;
+    reg  [2:0] raddr1;
+    reg  [2:0] raddr2;
+
+    wire [3:0] rdata1;
+    wire [3:0] rdata2;
+
+    // -------------------------
+    // DUT instantiation
+    // -------------------------
+    reg_file dut (
+        .clk(clk),
+        .rst(rst),
+        .we(we),
+        .waddr(waddr),
+        .wdata(wdata),
+        .raddr1(raddr1),
+        .raddr2(raddr2),
+        .rdata1(rdata1),
+        .rdata2(rdata2)
+    );
+
+    // -------------------------
+    // Clock generation
+    // -------------------------
+    initial begin
+        clk = 0;
+        forever #5 clk = ~clk;   // 10 ns clock
+    end
+
+    // -------------------------
+    // Test procedure
+    // -------------------------
+    initial begin
+        // -------- RESET --------
+        rst    = 1;
+        we     = 0;
+        waddr = 0;
+        wdata = 0;
+        raddr1 = 0;
+        raddr2 = 1;
+
+        #10 rst = 0;
+
+        // -------- WRITE TESTS --------
+        #10 we = 1; waddr = 3'd1; wdata = 4'd5;   // R1 = 5
+        #10 we = 1; waddr = 3'd2; wdata = 4'd9;   // R2 = 9
+        #10 we = 1; waddr = 3'd3; wdata = 4'd12;  // R3 = 12
+
+        // -------- READ TESTS --------
+        #10 we = 0;
+            raddr1 = 3'd1;   // expect 5
+            raddr2 = 3'd2;   // expect 9
+
+        #10 raddr1 = 3'd3;   // expect 12
+            raddr2 = 3'd0;   // expect 0
+
+        // -------- OVERWRITE TEST --------
+        #10 we = 1; waddr = 3'd1; wdata = 4'd7;   // R1 = 7
+        #10 we = 0; raddr1 = 3'd1;                // expect 7
+
+        // -------- WRITE DISABLED TEST --------
+        #10 we = 0; waddr = 3'd4; wdata = 4'd15;  // should NOT write
+        #10 raddr1 = 3'd4;                        // expect 0
+
+        #20 $finish;
+    end
+
+    // -------------------------
+    // Monitor (paper evidence)
+    // -------------------------
+    initial begin
+        $display("Time\tWE\tWADDR\tWDATA\tRADDR1\tRDATA1\tRADDR2\tRDATA2");
+        $monitor("%0t\t%b\t%0d\t%0d\t%0d\t%0d\t%0d\t%0d",
+                  $time, we, waddr, wdata,
+                  raddr1, rdata1,
+                  raddr2, rdata2);
+    end
+
+endmodule
+

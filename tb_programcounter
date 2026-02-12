@@ -1,0 +1,78 @@
+`timescale 1ns / 1ps
+
+module tb_program;
+
+    
+    reg        clk;
+    reg        rst;
+    reg        pc_we;
+    reg        pc_load;
+    reg  [3:0] pc_in;
+
+    wire [3:0] pc_out;
+
+    
+    program dut (
+        .clk     (clk),
+        .rst     (rst),
+        .pc_we   (pc_we),
+        .pc_load (pc_load),
+        .pc_in   (pc_in),
+        .pc_out  (pc_out)
+    );
+
+    
+    always #5 clk = ~clk;
+
+    
+    initial begin
+        // Initialize
+        clk     = 0;
+        rst     = 1;
+        pc_we  = 0;
+        pc_load= 0;
+        pc_in  = 4'd0;
+
+       
+        #10;
+        rst = 0;
+
+       
+        pc_we = 1;
+        #40;    // 4 clock cycles
+
+       
+        pc_we   = 0;
+        pc_load = 1;
+        pc_in   = 4'd9;
+        #10;
+
+       
+        
+        pc_load = 0;
+        pc_we   = 1;
+        #30;
+
+       
+        pc_we = 0;
+        #20;
+
+        
+        rst = 1;
+        #10;
+        rst = 0;
+
+        #20;
+
+        $finish;
+    end
+
+    
+    initial begin
+        $monitor(
+            "Time=%0t | rst=%b | pc_we=%b | pc_load=%b | pc_in=%d | pc_out=%d",
+            $time, rst, pc_we, pc_load, pc_in, pc_out
+        );
+    end
+
+endmodule

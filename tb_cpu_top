@@ -1,0 +1,49 @@
+timescale 1ns / 1ps
+
+module cpu_top_tb;
+
+    // Testbench signals
+    reg clk;
+    reg rst;
+
+    wire [3:0] debug_pc;
+    wire [3:0] debug_alu;
+
+    // Instantiate DUT (Device Under Test)
+    cpu_top DUT (
+        .clk(clk),
+        .rst(rst),
+        .debug_pc(debug_pc),
+        .debug_alu(debug_alu)
+    );
+
+    // ================= CLOCK GENERATION =================
+    initial begin
+        clk = 0;
+        forever #5 clk = ~clk;   // 10ns clock period
+    end
+
+    // ================= TEST SEQUENCE =================
+    initial begin
+
+        // Initialize
+        rst = 1;
+        #20;
+        rst = 0;
+
+        // Run enough cycles to execute all 16 instructions
+        #400;
+
+        // Finish simulation
+        $stop;
+    end
+
+    // ================= MONITOR =================
+    initial begin
+        $display("Time\tPC\tALU_Result");
+        $monitor("%0t\t%h\t%h",
+                 $time, debug_pc, debug_alu);
+    end
+
+endmodule
+
